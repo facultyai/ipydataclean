@@ -12,24 +12,36 @@ from dataclean.widget import (
     CallbackManager,
     ColumnWidgetController,
     DataFrameWidgetController,
-    PipelineWidgetController
+    PipelineWidgetController,
 )
 
 
 def create_new_code_cell(code):
     """Javascript to create and populate a new code cell in the notebook"""
     encoded_code = bytes_to_str(b64encode(str_to_bytes(code)))
-    display(Javascript("""
+    display(
+        Javascript(
+            """
         var code_cell = IPython.notebook.insert_cell_below('code');
         code_cell.set_text(atob("{0}"));
-    """.format(encoded_code)))
+    """.format(
+                encoded_code
+            )
+        )
+    )
 
 
 def display_colwidget(col_id):
     """Javascript to display a collapsed column widget"""
-    display(Javascript("""
+    display(
+        Javascript(
+            """
         if ($('#{0}_row').hasClass('hidden')){{$('#{0}').click()}}
-    """.format(str(col_id))))
+    """.format(
+                str(col_id)
+            )
+        )
+    )
 
 
 class DataCleaner(object):
@@ -37,13 +49,13 @@ class DataCleaner(object):
 
     def __init__(self):
         self.dataframe_managers = {}
-        self._main = sys.modules['__main__']
+        self._main = sys.modules["__main__"]
         self.refresh()
 
     def refresh(self):
         dataframe_managers_new = {}
         for var_name, var in vars(self._main).items():
-            if isinstance(var, DataFrame) and not var_name.startswith('_'):
+            if isinstance(var, DataFrame) and not var_name.startswith("_"):
                 manager = self._manager_for_dataframe(var, var_name)
                 dataframe_managers_new[id(var)] = manager
 
@@ -68,13 +80,13 @@ class DataCleaner(object):
             manager = DataframeManager(dataframe, name)
 
             def export_cleaned_dataframe(new_dataframe, dataframe_name):
-                new_df_name = dataframe_name + '_cleaned'
+                new_df_name = dataframe_name + "_cleaned"
                 suffix = 0
 
                 # ensures we have a unique name
                 while getattr(self._main, new_df_name, None) is not None:
                     suffix += 1
-                    new_df_name = dataframe_name + '_cleaned_' + str(suffix)
+                    new_df_name = dataframe_name + "_cleaned_" + str(suffix)
 
                 setattr(self._main, new_df_name, new_dataframe)
 
@@ -84,9 +96,7 @@ class DataCleaner(object):
             manager.execute_callback.register_callback(
                 export_cleaned_dataframe
             )
-            manager.export_callback.register_callback(
-                export_to_code
-            )
+            manager.export_callback.register_callback(export_to_code)
 
         return manager
 
@@ -114,8 +124,8 @@ class DataframeManager(object):
             self.dataframe = dataframe
             self.is_sample = False
 
-        if not(dataframe.columns.is_unique and dataframe.index.is_unique):
-            self.dataframe = DataFrame({'_':[]})
+        if not (dataframe.columns.is_unique and dataframe.index.is_unique):
+            self.dataframe = DataFrame({"_": []})
 
         self.pipeline = Pipeline()
         self.active_step = None
@@ -126,24 +136,28 @@ class DataframeManager(object):
 
     def metadata(self):
         metadata = {
-            'dfName': self.name,
-            'dfId': id(self.full_dataframe),
-            'dfShape': self.full_dataframe.shape,
-            'dfColnames': sorted(
+            "dfName": self.name,
+            "dfId": id(self.full_dataframe),
+            "dfShape": self.full_dataframe.shape,
+            "dfColnames": sorted(
                 self.full_dataframe.columns.to_series().apply(str)
             ),
-            'dfCols': [{
-                'colname': colname,
-                'colId': id(self.full_dataframe[colname]),
-                'description': {
-                    'dtype': str(column.dtype),
-                    'null_percentage': "{0:.0f}%".format(
-                        100 * column.isnull().sum()
-                        / float(len(column)) if len(column) > 0 else 0
-                    ),
-                    'distinct': len(column.value_counts())
+            "dfCols": [
+                {
+                    "colname": colname,
+                    "colId": id(self.full_dataframe[colname]),
+                    "description": {
+                        "dtype": str(column.dtype),
+                        "null_percentage": "{0:.0f}%".format(
+                            100 * column.isnull().sum() / float(len(column))
+                            if len(column) > 0
+                            else 0
+                        ),
+                        "distinct": len(column.value_counts()),
+                    },
                 }
-            } for colname, column in self.full_dataframe.items()]
+                for colname, column in self.full_dataframe.items()
+            ],
         }
         return metadata
 
@@ -151,42 +165,39 @@ class DataframeManager(object):
     def dataframe_widget(self):
         if self._dataframe_widget_controller is None:
             self._dataframe_widget_controller = DataFrameWidgetController(
-                self.pipeline_widget,
-                self.MAX_ROWS if self.is_sample else 0
+                self.pipeline_widget, self.MAX_ROWS if self.is_sample else 0
             )
 
             def resample():
                 self.dataframe = self.full_dataframe.sample(n=self.MAX_ROWS)
                 self._refresh_colwidgets()
 
-            self._dataframe_widget_controller.resample_callback \
-                .register_callback(resample)
-            self._dataframe_widget_controller.new_step_callback \
-                .register_callback(self._new_step)
-            self._dataframe_widget_controller.modify_step_callback \
-                .register_callback(self._replace_active_step)
+            self._dataframe_widget_controller.resample_callback.register_callback(
+                resample
+            )
+            self._dataframe_widget_controller.new_step_callback.register_callback(
+                self._new_step
+            )
+            self._dataframe_widget_controller.modify_step_callback.register_callback(
+                self._replace_active_step
+            )
 
-        if self.dataframe.equals(DataFrame({'_':[]})):
+        if self.dataframe.equals(DataFrame({"_": []})):
             widget = ipywidgets.Label(
                 value=(
-                    'DataFrames with non-unique column names or index are '
-                    'unsupported.'
+                    "DataFrames with non-unique column names or index are "
+                    "unsupported."
                 ),
-                layout=ipywidgets.Layout(width='600px')
+                layout=ipywidgets.Layout(width="600px"),
             )
         elif self.dataframe.empty:
-            widget = ipywidgets.Label(
-                value=(
-                    'DataFrame is empty.'
-                )
-            )
+            widget = ipywidgets.Label(value=("DataFrame is empty."))
         else:
             widget = self._dataframe_widget_controller.render_widget(
-            self.dataframe, self.active_step
-        )
+                self.dataframe, self.active_step
+            )
 
         return widget
-
 
     @property
     def pipeline_widget(self):
@@ -198,7 +209,7 @@ class DataframeManager(object):
             def enter_edit_mode(active_step):
                 self._refresh_colwidgets(step=active_step)
                 self.active_step = active_step
-                if hasattr(active_step, 'colname'):
+                if hasattr(active_step, "colname"):
                     display_colwidget(
                         id(self.full_dataframe[active_step.colname])
                     )
@@ -209,8 +220,7 @@ class DataframeManager(object):
 
             def execute_pipeline():
                 new_dataframe = self.pipeline.execute(
-                    self.full_dataframe.copy(),
-                    preview=False
+                    self.full_dataframe.copy(), preview=False
                 )
                 self.execute_callback.send_callbacks(new_dataframe, self.name)
 
@@ -218,29 +228,34 @@ class DataframeManager(object):
                 code = self.pipeline.export()
                 self.export_callback.send_callbacks(code)
 
-            self._pipeline_widget_controller.add_mode_callback \
-                .register_callback(enter_add_mode)
-            self._pipeline_widget_controller.edit_mode_callback \
-                .register_callback(enter_edit_mode)
+            self._pipeline_widget_controller.add_mode_callback.register_callback(
+                enter_add_mode
+            )
+            self._pipeline_widget_controller.edit_mode_callback.register_callback(
+                enter_edit_mode
+            )
 
-            self._pipeline_widget_controller.execute_callback \
-                .register_callback(execute_pipeline)
-            self._pipeline_widget_controller.export_callback \
-                .register_callback(export_pipeline)
+            self._pipeline_widget_controller.execute_callback.register_callback(
+                execute_pipeline
+            )
+            self._pipeline_widget_controller.export_callback.register_callback(
+                export_pipeline
+            )
 
-            self._pipeline_widget_controller.delete_step_callback \
-                .register_callback(self._delete_step)
+            self._pipeline_widget_controller.delete_step_callback.register_callback(
+                self._delete_step
+            )
 
         return self._pipeline_widget_controller.render_widget(self.active_step)
 
     def column_widget(self, col_id):
         if self.dataframe.empty:
-            widget = ipywidgets.Label(value='')
+            widget = ipywidgets.Label(value="")
         else:
             if col_id in self.column_widget_controller_by_id:
-                col_widget_controller = (
-                    self.column_widget_controller_by_id[col_id]
-                )
+                col_widget_controller = self.column_widget_controller_by_id[
+                    col_id
+                ]
             else:
                 column = self.column_by_id[col_id]
 
@@ -249,30 +264,31 @@ class DataframeManager(object):
                     column, self.dataframe, self.active_step
                 )
 
-                self.column_widget_controller_by_id[col_id] = (
-                    col_widget_controller
-                )
+                self.column_widget_controller_by_id[
+                    col_id
+                ] = col_widget_controller
 
-                col_widget_controller.new_step_callback \
-                    .register_callback(self._new_step)
-                col_widget_controller.modify_step_callback \
-                    .register_callback(self._replace_active_step)
+                col_widget_controller.new_step_callback.register_callback(
+                    self._new_step
+                )
+                col_widget_controller.modify_step_callback.register_callback(
+                    self._replace_active_step
+                )
 
             widget = col_widget_controller.render_widget()
 
         return widget
 
     def _refresh_colwidgets(self, step=None):
-        new_dataframe = self.pipeline.execute(
-            self.dataframe, up_to_step=step
-        )
+        new_dataframe = self.pipeline.execute(self.dataframe, up_to_step=step)
         for (
-            col_id, col_widget_controller
+            col_id,
+            col_widget_controller,
         ) in self.column_widget_controller_by_id.items():
             col_widget_controller.load_data(
                 new_dataframe[self.column_by_id[col_id].name],
                 new_dataframe,
-                step
+                step,
             )
             col_widget_controller.render_widget()
         self._dataframe_widget_controller.render_widget(new_dataframe, step)

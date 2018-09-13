@@ -12,15 +12,19 @@ except ImportError:  # Python 2
 from inspect import getsourcelines, ismethod, isclass, isfunction, ismodule
 from textwrap import dedent
 
+
 def indent(text, prefix):
     """Adds 'prefix' to the beginning of lines in 'text'."""
 
     def prefixed_lines():
         for line in text.splitlines(True):
             yield (prefix + line if line.strip() else line)
-    return ''.join(prefixed_lines())
 
-ClosureVars = namedtuple('ClosureVars', 'nonlocals globals builtins unbound')
+    return "".join(prefixed_lines())
+
+
+ClosureVars = namedtuple("ClosureVars", "nonlocals globals builtins unbound")
+
 
 def getclosurevars(func):
     """
@@ -45,9 +49,9 @@ def getclosurevars(func):
         nonlocal_vars = {}
     else:
         nonlocal_vars = {
-            var : cell.cell_contents
+            var: cell.cell_contents
             for var, cell in zip(code.co_freevars, func.__closure__)
-       }
+        }
 
     # Global and builtin references are named in co_names and resolved
     # by looking them up in __globals__ or __builtins__
@@ -71,24 +75,23 @@ def getclosurevars(func):
             except KeyError:
                 unbound_names.add(name)
 
-    return ClosureVars(nonlocal_vars, global_vars,
-                       builtin_vars, unbound_names)
+    return ClosureVars(nonlocal_vars, global_vars, builtin_vars, unbound_names)
 
 
-CODE_INDENT = '    '
+CODE_INDENT = "    "
 
-EXPORT_FUNCTION_SIGNATURE = 'def exported_pipeline(df):\n'
+EXPORT_FUNCTION_SIGNATURE = "def exported_pipeline(df):\n"
 
-STEP_CODE_PREFIX = indent('\ndataframe = df.copy()\n\n', CODE_INDENT)
+STEP_CODE_PREFIX = indent("\ndataframe = df.copy()\n\n", CODE_INDENT)
 
-STEP_CODE_SUFFIX = indent('return dataframe', CODE_INDENT)
+STEP_CODE_SUFFIX = indent("return dataframe", CODE_INDENT)
 
 
 def replace(string, substitutions):
     """Replaces all substitutions in one pass to avoid conflicts"""
 
     substrings = sorted(substitutions, key=len, reverse=True)
-    regex = re.compile('|'.join(map(re.escape, substrings)))
+    regex = re.compile("|".join(map(re.escape, substrings)))
     return regex.sub(lambda match: substitutions[match.group(0)], string)
 
 
@@ -117,11 +120,11 @@ def render_code(function, **params):
     """
 
     substitutions = {}
-    comment = ''
+    comment = ""
 
-    if 'code_comment' in params:
-        for line in params['code_comment'].split('\n'):
-            comment += '# ' + line + '\n'
+    if "code_comment" in params:
+        for line in params["code_comment"].split("\n"):
+            comment += "# " + line + "\n"
 
     code = getsourcelines(function)
 
@@ -167,26 +170,25 @@ def get_module_dependencies(function):
     for name, imported in getclosurevars(function).globals.items():
 
         if hasattr(imported, "__module__"):
-            import_statement = 'from {0} import {1}'.format(
-                imported.__module__,
-                imported.__name__
+            import_statement = "from {0} import {1}".format(
+                imported.__module__, imported.__name__
             )
 
-            if (imported.__name__ != name):
-                import_statement += ' as {0}'.format(name)
+            if imported.__name__ != name:
+                import_statement += " as {0}".format(name)
 
-            import_statement += '\n'
+            import_statement += "\n"
 
         elif ismodule(imported):
-            import_statement = 'import {0}'.format(imported.__name__)
+            import_statement = "import {0}".format(imported.__name__)
 
-            if (imported.__name__ != name):
-                import_statement += ' as {0}'.format(name)
+            if imported.__name__ != name:
+                import_statement += " as {0}".format(name)
 
-            import_statement += '\n'
+            import_statement += "\n"
 
         else:
-            import_statement = '{0} = {1}\n'.format(name, repr(imported))
+            import_statement = "{0} = {1}\n".format(name, repr(imported))
 
         if import_statement:
             import_list.append(indent(import_statement, CODE_INDENT))
