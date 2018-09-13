@@ -2,8 +2,9 @@ from setuptools import setup
 import os
 
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+def read_long_description():
+    with open(os.path.join(os.path.dirname(__file__), "README.rst")) as fp:
+        return fp.read()
 
 
 static_js_files = [
@@ -21,7 +22,7 @@ setup(
     author_email="engineering@asidatascience.com",
     description="Interactive cleaning for pandas DataFrames",
     license="Apache 2.0",
-    long_description=read("README.rst"),
+    long_description=read_long_description(),
     data_files=[("share/jupyter/nbextensions/sherlockml-dataclean", static_js_files)],
     packages=["dataclean"],
     install_requires=[
