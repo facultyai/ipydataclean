@@ -6,7 +6,7 @@ import dataclean.codegen as codegen
 from dataclean.cleaning import (
     OUTLIER_REMOVAL_METHODS,
     NULL_REMOVAL_METHODS,
-    TYPE_CONVERT_METHODS
+    TYPE_CONVERT_METHODS,
 )
 
 
@@ -24,8 +24,7 @@ class DataCleanStepBase(object):
 
     def execute(self, dataframe, preview=True):
         return self.cleaning_function(
-            dataframe.copy() if preview else dataframe,
-            **self.params
+            dataframe.copy() if preview else dataframe, **self.params
         )
 
     @abstractproperty
@@ -49,10 +48,10 @@ class OutlierRemovalStep(DataCleanStepBase):
 
     def __init__(self, **params):
         super(OutlierRemovalStep, self).__init__(**params)
-        self.colname = self.params['colname']
-        self.low_cut = self.params['low_cut']
-        self.high_cut = self.params['high_cut']
-        self.replacement_method = self.params.pop('replacement_method')
+        self.colname = self.params["colname"]
+        self.low_cut = self.params["low_cut"]
+        self.high_cut = self.params["high_cut"]
+        self.replacement_method = self.params.pop("replacement_method")
 
     @property
     def cleaning_function(self):
@@ -61,13 +60,13 @@ class OutlierRemovalStep(DataCleanStepBase):
     @property
     def description(self):
         description = (
-            'On {colname}, '
-            'for values outside {low_cut} to {high_cut}, {replacement_method}'
+            "On {colname}, "
+            "for values outside {low_cut} to {high_cut}, {replacement_method}"
         ).format(
             colname=self.colname,
             low_cut=self.low_cut,
             high_cut=self.high_cut,
-            replacement_method=self.replacement_method.value
+            replacement_method=self.replacement_method.value,
         )
 
         return description
@@ -78,8 +77,8 @@ class NullRemovalStep(DataCleanStepBase):
 
     def __init__(self, **params):
         super(NullRemovalStep, self).__init__(**params)
-        self.colname = self.params['colname']
-        self.replacement_method = self.params.pop('replacement_method')
+        self.colname = self.params["colname"]
+        self.replacement_method = self.params.pop("replacement_method")
 
     @property
     def cleaning_function(self):
@@ -88,11 +87,10 @@ class NullRemovalStep(DataCleanStepBase):
     @property
     def description(self):
         description = (
-            'On {colname}, '
-            + 'for missing values, {replacement_method}'
+            "On {colname}, " + "for missing values, {replacement_method}"
         ).format(
             colname=self.colname,
-            replacement_method=self.replacement_method.value
+            replacement_method=self.replacement_method.value,
         )
 
         return description
@@ -103,9 +101,9 @@ class TypeConversionStep(DataCleanStepBase):
 
     def __init__(self, **params):
         super(TypeConversionStep, self).__init__(**params)
-        self.colname = self.params['colname']
-        self.data_type = self.params['data_type']
-        self.replacement_method = self.params.pop('replacement_method')
+        self.colname = self.params["colname"]
+        self.data_type = self.params["data_type"]
+        self.replacement_method = self.params.pop("replacement_method")
 
     @property
     def cleaning_function(self):
@@ -114,12 +112,12 @@ class TypeConversionStep(DataCleanStepBase):
     @property
     def description(self):
         description = (
-            'On {colname}, '
-            + 'for non {data_type} types, {replacement_method}'
+            "On {colname}, "
+            + "for non {data_type} types, {replacement_method}"
         ).format(
             colname=self.colname,
             replacement_method=self.replacement_method.value,
-            data_type=self.data_type.__name__
+            data_type=self.data_type.__name__,
         )
 
         return description
@@ -130,8 +128,8 @@ class RbmStep(DataCleanStepBase):
 
     def __init__(self, **params):
         super(RbmStep, self).__init__(**params)
-        self.numerical_columns = self.params['numerical_columns']
-        self.categorical_columns = self.params['categorical_columns']
+        self.numerical_columns = self.params["numerical_columns"]
+        self.categorical_columns = self.params["categorical_columns"]
 
     @property
     def cleaning_function(self):
@@ -147,8 +145,7 @@ class RbmStep(DataCleanStepBase):
     @property
     def description(self):
         description = (
-            'On {num_cols} columns, '
-            + 'impute values, with an RBM'
+            "On {num_cols} columns, " + "impute values, with an RBM"
         ).format(
             num_cols=len(self.numerical_columns + self.categorical_columns)
         )
@@ -199,7 +196,7 @@ class Pipeline(object):
     def export(self):
         """Returns the python code making up the pipeline"""
 
-        code = ''
+        code = ""
         imports = []
 
         for step in self.steps:
@@ -212,9 +209,7 @@ class Pipeline(object):
             export_code += import_statement
 
         export_code += (
-            codegen.STEP_CODE_PREFIX
-            + code
-            + codegen.STEP_CODE_SUFFIX
+            codegen.STEP_CODE_PREFIX + code + codegen.STEP_CODE_SUFFIX
         )
 
         return export_code
