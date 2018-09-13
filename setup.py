@@ -1,39 +1,40 @@
-from setuptools import setup
 import os
+from setuptools import setup
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
-
-static_js_files = [
-    'dataclean/static/main.js',
-    'dataclean/static/jquery.tablesorter.min.js',
-    'dataclean/static/iosbadge.js',
-    'dataclean/static/main.css',
+STATIC_JS_FILES = [
+    "dataclean/static/main.js",
+    "dataclean/static/jquery.tablesorter.min.js",
+    "dataclean/static/iosbadge.js",
+    "dataclean/static/main.css",
 ]
 
+
+def read_long_description():
+    with open(os.path.join(os.path.dirname(__file__), "README.rst")) as fp:
+        return fp.read()
+
+
 setup(
-    name='sherlockml-dataclean',
-    version='0.2.2',
-    url='https://sherlockml.com',
-    author='ASI Data Science',
-    author_email='engineering@asidatascience.com',
-    description='Interactive cleaning for pandas DataFrames',
-    license='Apache 2.0',
-    long_description=read('README.rst'),
-    data_files=[
-        ('share/jupyter/nbextensions/sherlockml-dataclean', static_js_files)
-    ],
-    packages=['dataclean'],
+    name="sherlockml-dataclean",
+    version="0.2.2",
+    url="https://github.com/ASIDataScience/sherlockml-dataclean",
+    author="ASI Data Science",
+    author_email="engineering@asidatascience.com",
+    description="Interactive cleaning for pandas DataFrames",
+    license="Apache 2.0",
+    long_description=read_long_description(),
+    data_files=[("share/jupyter/nbextensions/sherlockml-dataclean", STATIC_JS_FILES)],
+    packages=["dataclean"],
     install_requires=[
-        'pandas',
-        'numpy',
-        'matplotlib',
-        'ipywidgets>=7.0.0',
+        "future",
+        "ipython",
+        "ipywidgets>=7.0.0",
+        "matplotlib",
+        "numpy",
+        "pandas",
+        "scikit-learn",
+        "scipy",
+        "sherlockml-boltzmannclean",
         'funcsigs;python_version<"3.0"',
-        'scipy',
-        'scikit-learn',
-        'ipython',
-        'future',
-        'sherlockml-boltzmannclean'
-    ]
+    ],
 )
