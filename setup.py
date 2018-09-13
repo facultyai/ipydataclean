@@ -17,7 +17,7 @@ def read_long_description():
 setup(
     name="sherlockml-dataclean",
     version="0.2.2",
-    url="https://sherlockml.com",
+    url="https://github.com/ASIDataScience/sherlockml-dataclean",
     author="ASI Data Science",
     author_email="engineering@asidatascience.com",
     description="Interactive cleaning for pandas DataFrames",
