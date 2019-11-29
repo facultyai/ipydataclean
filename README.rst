@@ -1,4 +1,4 @@
-sherlockml-dataclean
+ipydataclean
 ====================
 
 Jupyter notebook extension and python library for interactive cleaning of pandas DataFrames with a selection of techniques, from simple replacements of missing values to imputation with a Restricted Boltzmann Machine.
@@ -8,7 +8,7 @@ Installation
 
 .. code-block:: bash
 
-    pip install sherlockml-dataclean
+    pip install ipydataclean
     jupyter nbextension enable dataclean --py --sys-prefix
 
 Usage
@@ -38,7 +38,7 @@ Clicking on the name of one of these columns will show data cleaning tools speci
 
    Creating a data cleaning step on a column.
 
-You can also choose to fill in missing and mistyped values in your DataFrame with a Restricted Boltzmann Machine. This uses the sherlockml-boltzmannclean package.
+You can also choose to fill in missing and mistyped values in your DataFrame with a Restricted Boltzmann Machine. This uses the boltzmannclean package.
 
 .. figure:: https://user-images.githubusercontent.com/29061040/37828870-d096628e-2e94-11e8-9291-511fab3bdf7a.png
    :width: 40 %

@@ -15,15 +15,15 @@ def read_long_description():
 
 
 setup(
-    name="sherlockml-dataclean",
+    name="ipydataclean",
     version="0.2.2",
-    url="https://github.com/ASIDataScience/sherlockml-dataclean",
-    author="ASI Data Science",
-    author_email="opensource@asidatascience.com",
+    url="https://github.com/facultyai/ipydataclean",
+    author="Faculty",
+    author_email="opensource@faculty.ai",
     description="Interactive cleaning for pandas DataFrames",
     license="Apache 2.0",
     long_description=read_long_description(),
-    data_files=[("share/jupyter/nbextensions/sherlockml-dataclean", STATIC_JS_FILES)],
+    data_files=[("share/jupyter/nbextensions/ipydataclean", STATIC_JS_FILES)],
     packages=["dataclean"],
     install_requires=[
         "future",
@@ -34,7 +34,7 @@ setup(
         "pandas",
         "scikit-learn",
         "scipy",
-        "sherlockml-boltzmannclean",
+        "boltzmannclean",
         'funcsigs;python_version<"3.0"',
     ],
 )
