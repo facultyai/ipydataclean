@@ -1,5 +1,5 @@
 ipydataclean
-====================
+============
 
 Jupyter notebook extension and python library for interactive cleaning of pandas DataFrames with a selection of techniques, from simple replacements of missing values to imputation with a Restricted Boltzmann Machine.
 
@@ -61,7 +61,6 @@ These steps can be modified or deleted using these controls, and when ready the 
    :alt: An exported pipeline.
 
    An exported pipeline.
-
 
 Caveats
 -------
